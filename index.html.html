@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pyramid Dice Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #game-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .separator {
+            width: 30%;
+            height: 1px;
+            background-color: lightgrey;
+            margin: 30px 0;
+        }
+        .pyramid-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+        .circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            user-select: none;
+        }
+        #game-message, #score {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h2>Pyramid Dice Game</h2>
+        <button onclick="rollDice()">Roll Dice</button>
+        <p id="dice-result">Click to roll</p>
+        <div class="separator"></div>
+        <div class="pyramid-container" id="pyramid">
+            <div class="row"><div class="circle" onclick="placeNumber(this)"></div></div>
+            <div class="row"><div class="circle" onclick="placeNumber(this)"></div><div class="circle" onclick="placeNumber(this)"></div></div>
+            <div class="row"><div class="circle" onclick="placeNumber(this)"></div><div class="circle" onclick="placeNumber(this)"></div><div class="circle" onclick="placeNumber(this)"></div></div>
+            <div class="row"><div class="circle" onclick="placeNumber(this)"></div><div class="circle" onclick="placeNumber(this)"></div><div class="circle" onclick="placeNumber(this)"></div><div class="circle" onclick="placeNumber(this)"></div></div>
+            <div class="row"><div class="circle" onclick="placeNumber(this)"></div><div class="circle" onclick="placeNumber(this)"></div><div class="circle" onclick="placeNumber(this)"></div><div class="circle" onclick="placeNumber(this)"></div><div class="circle" onclick="placeNumber(this)"></div></div>
+        </div>
+        <div class="separator"></div>
+        <p id="game-message"></p>
+        <p id="score">Games Won: <span id="win-count">0</span>/<span id="total-games">0</span></p>
+        <div class="button-container">
+            <button onclick="resetGame()">New Game</button>
+            <button onclick="startHardGame()">New Game, but Harder!</button>
+        </div>
+    </div>
+    <script>
+        let diceValue = null;
+        let winCount = 0;
+        let totalGames = 0;
+
+        function rollDice() {
+            diceValue = Math.floor(Math.random() * 6) + 1;
+            document.getElementById('dice-result').textContent = `Rolled: ${diceValue}`;
+        }
+
+        function placeNumber(circle) {
+            if (diceValue !== null && circle.textContent === "") {
+                circle.textContent = diceValue;
+                diceValue = null;
+                document.getElementById('dice-result').textContent = "Click to roll";
+                checkWinCondition();
+            }
+        }
+
+        function resetGame() {
+            document.querySelectorAll('.circle').forEach(circle => circle.textContent = "");
+            document.getElementById('game-message').textContent = "";
+        }
+
+        function startHardGame() {
+            resetGame();
+            let circles = Array.from(document.querySelectorAll('.circle'));
+            let selected = new Set();
+            while (selected.size < 5) {
+                let randomIndex = Math.floor(Math.random() * circles.length);
+                selected.add(randomIndex);
+            }
+            selected.forEach(index => circles[index].textContent = Math.floor(Math.random() * 6) + 1);
+        }
+
+        function checkWinCondition() {
+            let allCircles = document.querySelectorAll('.circle');
+            if ([...allCircles].some(circle => circle.textContent === "")) return;
+            
+            let rows = [
+                document.querySelectorAll('.row:nth-child(1) .circle'),
+                document.querySelectorAll('.row:nth-child(2) .circle'),
+                document.querySelectorAll('.row:nth-child(3) .circle'),
+                document.querySelectorAll('.row:nth-child(4) .circle'),
+                document.querySelectorAll('.row:nth-child(5) .circle')
+            ];
+            
+            let sums = rows.map(row => Array.from(row).reduce((sum, circle) => sum + (parseInt(circle.textContent) || 0), 0));
+            
+            totalGames++;
+            if (sums[0] < sums[1] && sums[1] < sums[2] && sums[2] < sums[3] && sums[3] < sums[4]) {
+                document.getElementById('game-message').textContent = "You won!";
+                winCount++;
+            } else {
+                document.getElementById('game-message').textContent = "You lose!";
+            }
+            document.getElementById('win-count').textContent = winCount;
+            document.getElementById('total-games').textContent = totalGames;
+        }
+    </script>
+</body>
+</html>
